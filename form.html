@@ -14,6 +14,40 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./css/site.css" />
+    <style>
+      /* Additional styles for validation */
+      .error {
+        color: #e74c3c;
+        font-size: 12px;
+        margin-top: 4px; /* Changed from -10px to 4px */
+        margin-bottom: 10px;
+        display: none;
+      }
+
+      .input-error {
+        border-color: #e74c3c !important;
+        box-shadow: 0 0 5px rgba(231, 76, 60, 0.3);
+      }
+
+      .success {
+        color: #27ae60;
+      }
+
+      .error-message {
+        color: #e74c3c;
+      }
+
+      .form-button:disabled {
+        background-color: #95a5a6;
+        cursor: not-allowed;
+      }
+      
+      /* Added to ensure proper spacing */
+      .section-content input,
+      .section-content textarea {
+        margin-bottom: 4px;
+      }
+    </style>
     <title>Form</title>
   </head>
   <body>
@@ -34,16 +68,24 @@
           <div class="section-container">
             <div class="section-header">Enter product details</div>
             <div class="section-content">
-              <form action="">
+              <form id="productForm">
                 <label class="label" for="product">Product Name</label>
-                <input type="text" /><br />
+                <input type="text" id="product" name="product" />
+                <div class="error" id="product-error"></div>
+
                 <label class="label" for="price">Price</label>
-                <input type="number" /><br />
-                <label class="label" for="category">Quantity</label>
+                <input type="number" id="price" name="price" step="0.01" />
+                <div class="error" id="price-error"></div>
+
+                <label class="label" for="quantity">Quantity</label>
                 <input name="quantity" id="quantity" type="number" />
+                <div class="error" id="quantity-error"></div>
+
                 <label class="label" for="description">Description</label>
-                <textarea rows="6" name="description" id=""></textarea>
-                <button class="form-button" id="save">Save</button>
+                <textarea rows="6" name="description" id="description"></textarea>
+                <div class="error" id="description-error"></div>
+
+                <button class="form-button" type="submit" id="save">Save</button>
               </form>
             </div>
           </div>
@@ -51,25 +93,231 @@
         <div class="right"></div>
       </div>
     </div>
+
     <div id="myModal" class="modal">
       <div class="modal-content">
-        <span class="close" id="span">&times;</span>
-        <h3>Message</h3>
-        <p>Edit me for success and error messages</p>
+        <span class="close" id="closeModal">&times;</span>
+        <h3 id="modal-title">Message</h3>
+        <p id="modal-message">Edit me for success and error messages</p>
       </div>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      $("document").ready(() => {
+      // Task 1: Navigation toggle functionality
+      $("#toggle-nav").click(function() {
+        $("#sidebar").toggleClass("active");
+      });
 
-        $("#save").click((e) => {
-          e.preventDefault();
+      // Task 3: Form validation and submission
+      $(document).ready(function() {
+        
+        // Validation functions for each field
+        function validateProductName(name) {
+          if (!name || name.trim().length === 0) {
+            return "Product name is required";
+          }
+          if (name.trim().length < 5 || name.trim().length > 50) {
+            return "Product name must be between 5 and 50 characters";
+          }
+          return "";
+        }
+
+        function validatePrice(price) {
+          if (!price || price.trim().length === 0) {
+            return "Price is required";
+          }
+          const numPrice = parseFloat(price);
+          if (isNaN(numPrice) || numPrice <= 0) {
+            return "Price must be a number greater than 0";
+          }
+          return "";
+        }
+
+        function validateQuantity(quantity) {
+          if (!quantity || quantity.trim().length === 0) {
+            return "Quantity is required";
+          }
+          const numQuantity = parseFloat(quantity);
+          if (isNaN(numQuantity) || numQuantity <= 0) {
+            return "Quantity must be a number greater than 0";
+          }
+          return "";
+        }
+
+        function validateDescription(description) {
+          if (!description || description.trim().length === 0) {
+            return "Description is required";
+          }
+          if (description.trim().length < 5 || description.trim().length > 200) {
+            return "Description must be between 5 and 200 characters";
+          }
+          return "";
+        }
+
+        // Function to show error message for a field
+        function showError(fieldId, message) {
+          $("#" + fieldId).addClass("input-error");
+          $("#" + fieldId + "-error").text(message).show();
+        }
+
+        // Function to clear error message for a field
+        function clearError(fieldId) {
+          $("#" + fieldId).removeClass("input-error");
+          $("#" + fieldId + "-error").hide();
+        }
+
+        // Function to clear all error messages
+        function clearAllErrors() {
+          var fields = ["product", "price", "quantity", "description"];
+          for (var i = 0; i < fields.length; i++) {
+            clearError(fields[i]);
+          }
+        }
+
+        // Main form validation function
+        function validateForm() {
+          clearAllErrors();
+          
+          var isValid = true;
+          
+          // Get form values
+          var productName = $("#product").val();
+          var price = $("#price").val();
+          var quantity = $("#quantity").val();
+          var description = $("#description").val();
+
+          // Validate each field
+          var productError = validateProductName(productName);
+          if (productError) {
+            showError("product", productError);
+            isValid = false;
+          }
+
+          var priceError = validatePrice(price);
+          if (priceError) {
+            showError("price", priceError);
+            isValid = false;
+          }
+
+          var quantityError = validateQuantity(quantity);
+          if (quantityError) {
+            showError("quantity", quantityError);
+            isValid = false;
+          }
+
+          var descriptionError = validateDescription(description);
+          if (descriptionError) {
+            showError("description", descriptionError);
+            isValid = false;
+          }
+
+          return isValid;
+        }
+
+        // Function to show modal with message
+        function showModal(title, message, isSuccess) {
+          $("#modal-title").text(title);
+          $("#modal-message").text(message);
+          
+          if (isSuccess) {
+            $("#modal-message").removeClass("error-message").addClass("success");
+          } else {
+            $("#modal-message").removeClass("success").addClass("error-message");
+          }
+          
           $("#myModal").css("display", "block");
+        }
+
+        // Function to submit form data to API
+        function submitFormData(formData) {
+          $.ajax({
+            url: "http://localhost:3000/products/",
+            method: "POST",
+            data: formData,
+            success: function(response) {
+              showModal("Success", response.message || "Product added successfully!", true);
+              $("#productForm")[0].reset(); // Reset form after successful submission
+              clearAllErrors(); // Clear any remaining error states
+            },
+            error: function(xhr, status, error) {
+              var errorMessage = "Failed to add product. Please try again.";
+              
+              if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMessage = xhr.responseJSON.message;
+              }
+              
+              showModal("Error", errorMessage, false);
+            }
+          });
+        }
+
+        // Form submission handler
+        $("#productForm").submit(function(e) {
+          e.preventDefault();
+          
+          // Validate form before submission
+          if (validateForm()) {
+            // Prepare form data for API
+            var formData = {
+              name: $("#product").val().trim(),
+              price: parseFloat($("#price").val()),
+              quantity: parseFloat($("#quantity").val()),
+              description: $("#description").val().trim()
+            };
+            
+            // Submit to API
+            submitFormData(formData);
+          }
         });
 
-        $("#span").click((e) => {
-          e.preventDefault();
+        // Real-time validation on input change
+        $("#product").on("input", function() {
+          var error = validateProductName($(this).val());
+          if (error) {
+            showError("product", error);
+          } else {
+            clearError("product");
+          }
+        });
+
+        $("#price").on("input", function() {
+          var error = validatePrice($(this).val());
+          if (error) {
+            showError("price", error);
+          } else {
+            clearError("price");
+          }
+        });
+
+        $("#quantity").on("input", function() {
+          var error = validateQuantity($(this).val());
+          if (error) {
+            showError("quantity", error);
+          } else {
+            clearError("quantity");
+          }
+        });
+
+        $("#description").on("input", function() {
+          var error = validateDescription($(this).val());
+          if (error) {
+            showError("description", error);
+          } else {
+            clearError("description");
+          }
+        });
+
+        // Close modal handlers
+        $(".close").click(function() { // Fixed selector from #span to .close
           $("#myModal").css("display", "none");
+        });
+
+        // Close modal when clicking outside
+        $(window).click(function(event) {
+          if (event.target.id === "myModal") {
+            $("#myModal").css("display", "none");
+          }
         });
       });
     </script>

@@ -168,9 +168,10 @@ td {
   .container {
     flex-direction: column;
     .sidebar {
-      position: static;
-      height: auto;
-      width: 100%;
+      display: none;
+        position: fixed;
+        z-index: 1000;
+        height: auto;
     }
   }
   .summary-container {

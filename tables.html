@@ -151,8 +151,7 @@
               }, 3000); // Delay 3 seconds 
           }
         
-          loadProducts();
-      });
+  
       //Task 5c 
        $("#confirmDelete").click(() => {
               if (currentDeleteId) {
@@ -177,6 +176,41 @@
           $("#closeDelete").click(() => {
               $("#deleteModal").css("display", "none");
           });
+
+          //Task 5D
+            $("#editForm").submit(function(e) {
+              e.preventDefault();
+              
+              const productData = {
+                  id: $("#editId").val(),
+                  name: $("#editName").val(),
+                  price: parseFloat($("#editPrice").val()),
+                  quantity: parseInt($("#editQuantity").val()),
+                  description: $("#editDescription").val()
+              };
+              
+              $.ajax({
+                  url: "http://localhost:3000/products/",
+                  type: "PUT",
+                  contentType: "application/json",
+                  data: JSON.stringify(productData),
+                  success: function() {
+                      $("#editModal").css("display", "none");
+                      loadProducts(); // Reload table
+                  },
+                  error: function(xhr, status, error) {
+                      alert("Update failed: " + error);
+                  }
+              });
+          });
+          
+          $("#closeEdit").click(() => {
+              $("#editModal").css("display", "none");
+          });
+          
+          
+          loadProducts();
+      });
  </script>
   </body>
 </html>

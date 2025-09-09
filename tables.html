@@ -35,7 +35,7 @@
             <div class="section-header">Details of avalialble products</div>
             <div class="section-content">
               <!-- section content-->
-              <h4>Loading products...</h4>
+              <h4>Products will load shortly...</h4>
             </div>
           </div>
         </div>
@@ -44,6 +44,10 @@
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
    <script>
+       // Task 1: Nav
+      $("#toggle-nav").click(() => {
+          $("#sidebar").toggle();
+      });
       // Task 5a: Load products and create table 
       function loadProductsTable() {
     $.get("http://localhost:3000/products", function(products) {
@@ -80,7 +84,46 @@
     }).fail(function() {
         $(".section-content").html('<p>Error loading products. Please check if the API server is running.</p>');
     });
-}
+    }
+
+    //Task 5b: loading animation with in 3 seconds
+
+   function loadProductsTable() {
+          $.get("http://localhost:3000/products", function(products) {
+              let tableHTML = `
+                  <table>
+                      <tr>
+                          <th>ID</th>
+                          <th>Name</th>
+                          <th>Price</th>
+                          <th>Quantity</th>
+                          <th>Description</th>
+                          <th>Actions</th>
+                      </tr>
+              `;
+              
+              products.forEach(product => {
+                  tableHTML += `
+                      <tr>
+                          <td>${product.id}</td>
+                          <td>${product.name}</td>
+                          <td>$${product.price}</td>
+                          <td>${product.quantity}</td>
+                          <td>${product.description}</td>
+                          <td>
+                              <button class="form-button edit-btn" data-id="${product.id}">Edit</button>
+                              <button class="form-button delete-btn" data-id="${product.id}">Delete</button>
+                          </td>
+                      </tr>
+                  `;
+              });
+              
+              tableHTML += '</table>';
+              $(".section-content").html(tableHTML);
+          }).fail(function() {
+              $(".section-content").html('<p>Error loading products. Please check if the API server is running.</p>');
+          });
+      }
     </script>
   </body>
 </html>

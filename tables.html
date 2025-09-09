@@ -150,10 +150,33 @@
                   });
               }, 3000); // Delay 3 seconds 
           }
-          
         
           loadProducts();
       });
+      //Task 5c 
+       $("#confirmDelete").click(() => {
+              if (currentDeleteId) {
+                  $.ajax({
+                      url: `http://localhost:3000/products/${currentDeleteId}`,
+                      type: "DELETE",
+                      success: function() {
+                          $("#deleteModal").css("display", "none");
+                          loadProducts(); 
+                      },
+                      error: function(xhr, status, error) {
+                          alert("Delete failed: " + error);
+                      }
+                  });
+              }
+          });
+          
+          $("#cancelDelete").click(() => {
+              $("#deleteModal").css("display", "none");
+          });
+          
+          $("#closeDelete").click(() => {
+              $("#deleteModal").css("display", "none");
+          });
  </script>
   </body>
 </html>

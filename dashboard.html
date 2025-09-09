@@ -62,9 +62,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      $("document").ready(() => {
-        // Your js here
-      });
+      // Load dashboard stats
+function loadDashboardStats() {
+    $.get("http://localhost:3000/statistics", function(data) {
+        // Update the cards with the fetched data
+        $(".summary-content h2").eq(0).text(data.users || 0);
+        $(".summary-content h2").eq(1).text(data.products || 0);
+        $(".summary-content h2").eq(2).text(data.sales || 0);
+        $(".summary-content h2").eq(3).text("$" + (data.profit || 0));
+    }).fail(function() {
+        console.error("Failed to load dashboard stats");
+        // Fallback values in case API fails
+        $(".summary-content h2").eq(0).text("46");
+        $(".summary-content h2").eq(1).text("123");
+        $(".summary-content h2").eq(2).text("67");
+        $(".summary-content h2").eq(3).text("$23000");
+    });
+}
     </script>
   </body>
 </html>

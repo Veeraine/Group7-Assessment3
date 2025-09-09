@@ -44,60 +44,116 @@
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
    <script>
-       // Task 1: Nav
+       // Task 5a
       $("#toggle-nav").click(() => {
           $("#sidebar").toggle();
       });
-      // Task 5a: Load products and create table 
-     // Step 5a: Load products and create table
-      function loadProductsTable() {
-          $.get("http://localhost:3000/products", function(products) {
-              let tableHTML = `
-                  <table>
-                      <tr>
-                          <th>ID</th>
-                          <th>Name</th>
-                          <th>Price</th>
-                          <th>Quantity</th>
-                          <th>Description</th>
-                          <th>Actions</th>
-                      </tr>
-              `;
-              
-              products.forEach(product => {
-                  tableHTML += `
-                      <tr>
-                          <td>${product.id}</td>
-                          <td>${product.name}</td>
-                          <td>$${product.price}</td>
-                          <td>${product.quantity}</td>
-                          <td>${product.description}</td>
-                          <td>
-                              <button class="form-button edit-btn" data-id="${product.id}">Edit</button>
-                              <button class="form-button delete-btn" data-id="${product.id}">Delete</button>
-                          </td>
-                      </tr>
-                  `;
-              });
-              
-              tableHTML += '</table>';
-              $(".section-content").html(tableHTML);
-          }).fail(function() {
-              $(".section-content").html('<p>Error loading products. Please check if the API server is running.</p>');
-          });
-      }
+       $("#toggle-nav").click(() => {
+          $("#sidebar").toggle();
+      });
 
-      // Step 5b: Load products with 3-second loading animation
-      function loadProductsWithLoader() {
-          // Show loader
-          $(".section-content").html('<div class="loader"></div>');
+      // Modal for delete confirmation
+      const deleteModal = `
+          <div id="deleteModal" class="modal">
+              <div class="modal-content">
+                  <span class="close" id="closeDelete">&times;</span>
+                  <h3>Confirm Delete</h3>
+                  <p>Are you sure you want to delete this product?</p>
+                  <button id="confirmDelete" class="form-button">Yes, Delete</button>
+                  <button id="cancelDelete" class="form-button">Cancel</button>
+              </div>
+          </div>
+      `;
+
+      // Edit form modal
+      const editModal = `
+          <div id="editModal" class="modal">
+              <div class="modal-content">
+                  <span class="close" id="closeEdit">&times;</span>
+                  <h3>Edit Product</h3>
+                  <form id="editForm">
+                      <input type="hidden" id="editId">
+                      <label class="label" for="editName">Product Name</label>
+                      <input type="text" id="editName"><br>
+                      <label class="label" for="editPrice">Price</label>
+                      <input type="number" id="editPrice"><br>
+                      <label class="label" for="editQuantity">Quantity</label>
+                      <input type="number" id="editQuantity"><br>
+                      <label class="label" for="editDescription">Description</label>
+                      <textarea id="editDescription" rows="6"></textarea>
+                      <button type="submit" class="form-button">Update</button>
+                  </form>
+              </div>
+          </div>
+      `;
+
+      $("document").ready(() => {
+        
+          $("body").append(deleteModal + editModal);
           
-          // Simulate slow process with 3-second delay
-          setTimeout(() => {
-              loadProductsTable();
-          }, 3000); // 3-second delay
-      }
-      
+          let currentDeleteId = null;
+          
+          function loadProducts() {
+              $(".section-content").html('<div class="loader"></div>');
+              
+              setTimeout(() => {
+                  $.get("http://localhost:3000/products", function(products) {
+                      let tableHTML = `
+                          <table>
+                              <tr>
+                                  <th>ID</th>
+                                  <th>Name</th>
+                                  <th>Price</th>
+                                  <th>Quantity</th>
+                                  <th>Description</th>
+                                  <th>Actions</th>
+                              </tr>
+                      `;
+                      
+                      products.forEach(product => {
+                          tableHTML += `
+                              <tr>
+                                  <td>${product.id}</td>
+                                  <td>${product.name}</td>
+                                  <td>$${product.price}</td>
+                                  <td>${product.quantity}</td>
+                                  <td>${product.description}</td>
+                                  <td>
+                                      <button class="form-button edit-btn" data-id="${product.id}">Edit</button>
+                                      <button class="form-button delete-btn" data-id="${product.id}">Delete</button>
+                                  </td>
+                              </tr>
+                          `;
+                      });
+                      
+                      tableHTML += '</table>';
+                      $(".section-content").html(tableHTML);
+                    
+                      $(".delete-btn").click(function() {
+                          currentDeleteId = $(this).data('id');
+                          $("#deleteModal").css("display", "block");
+                      });
+                      
+                      $(".edit-btn").click(function() {
+                          const productId = $(this).data('id');
+                          $.get(`http://localhost:3000/products/${productId}`, function(product) {
+                              $("#editId").val(product.id);
+                              $("#editName").val(product.name);
+                              $("#editPrice").val(product.price);
+                              $("#editQuantity").val(product.quantity);
+                              $("#editDescription").val(product.description);
+                              $("#editModal").css("display", "block");
+                          });
+                      });
+                  }).fail(function() {
+                      $(".section-content").html('<p>Error loading products. Please check if the API server is running.</p>');
+                  });
+              }, 3000); // Delay 3 seconds 
+          }
+          
+        
+          loadProducts();
+      });
  </script>
   </body>
 </html>
